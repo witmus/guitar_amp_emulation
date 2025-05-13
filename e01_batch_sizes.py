@@ -30,12 +30,12 @@ n_layers = 1
 learning_rate = 0.001
 epochs = 25
 device = "cuda" if torch.cuda.is_available() else "cpu"
-
+print(device)
 batch_sizes = [100,200,300,400,500]
-num_steps = [100,200,300]
+steps_nums = [100,200,300]
 
 for bs,batch_size in enumerate(batch_sizes):
-    for ns,num_steps in enumerate(num_steps): 
+    for ns,num_steps in enumerate(steps_nums): 
         print(f'bs: {batch_size} ns: {num_steps}')
         print()
         scores_path = f'scores/batch_sizes/bs_{batch_size}_ns_{num_steps}.npy'

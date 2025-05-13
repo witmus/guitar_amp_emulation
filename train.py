@@ -29,14 +29,13 @@ def train(
     
     samples_per_batch = batch_size * num_steps
     train_samples = X_train.size(0)
-    val_padding = num_steps - (X_val.size(0) % num_steps)
-    if val_padding < num_steps:
+    val_padding = samples_per_batch - (X_val.size(0) % samples_per_batch)
+    if val_padding < samples_per_batch:
         X_val = torch.concatenate((X_val,torch.zeros(val_padding)))
         Y_val = torch.concatenate((Y_val,torch.zeros(val_padding)))
 
-    x_val_batched = X_val.view(-1,num_steps,1)
-    y_val_batched = Y_val.view(-1,num_steps,1)
-    val_batches = x_val_batched.size(0)
+    x_val_batched = X_val.view(-1,batch_size,num_steps,1)
+    y_val_batched = Y_val.view(-1,batch_size,num_steps,1)
 
     train_batches = int(train_samples / samples_per_batch)
 
@@ -44,15 +43,17 @@ def train(
 
     epochs_losses = []
 
-    model.to(device=device)
 
-    scores = np.zeros(shape=(epochs,5))
+    scores = np.zeros(shape=(epochs,4))
 
     for epoch in range(epochs):
+        if device == 'cuda':
+            model.to(device)
+
         model.train()
         epoch_start = time.time()
-        hidden_state = torch.zeros(1,batch_size,hidden_size)
-        cell_state = torch.zeros(1,batch_size,hidden_size)
+        hidden_state = torch.zeros(1,batch_size,hidden_size).to(device)
+        cell_state = torch.zeros(1,batch_size,hidden_size).to(device)
         print('epoch: %d' % epoch)
         losses = []
 
@@ -79,24 +80,26 @@ def train(
         epochs_losses.append(mean_loss)
 
         model.eval()
-        val_hidden_state = torch.zeros(1,val_batches,hidden_size)
-        val_cell_state = torch.zeros(1,val_batches,hidden_size)
+        if device == 'cuda':
+            model.to('cpu')
+
+        val_losses = []
+        val_hidden_state = torch.zeros(1,batch_size,hidden_size)
+        val_cell_state = torch.zeros(1,batch_size,hidden_size)
         val_state = (val_hidden_state,val_cell_state)
-        with profile(activities=[ProfilerActivity.CPU, ProfilerActivity.CUDA], record_shapes=True) as prof:
+        with profile(activities=[ProfilerActivity.CPU], record_shapes=True) as prof:
             with record_function("model_inference"):
-                test,_,_ = model(x_val_batched,val_state)
-
-        val_loss = loss_fn(test,y_val_batched)
-
+                for vx,vy in zip(x_val_batched,y_val_batched):
+                    test,val_hidden_state,val_cell_state = model(vx,val_state)
+                    val_losses.append(loss_fn(test,vy).item())
+        
         torch.save(model.state_dict(), model_path + f'checkpoint_{epoch}.pth')
-
-        print('train loss: %f' % mean_loss)
+        val_loss = np.mean(val_losses)
+        print('val loss: %f' % val_loss)
         scores[epoch,0] = mean_loss
-        scores[epoch,1] = val_loss.item()
+        scores[epoch,1] = val_loss
         scores[epoch,2] = epoch_time
         scores[epoch,3] = prof.key_averages().self_cpu_time_total
-        if device == 'cuda':
-            scores[epoch,4] = sum([item.cuda_time for item in prof.key_averages()])
         
         np.save(scores_path,scores)
 
