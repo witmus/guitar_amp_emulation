@@ -45,5 +45,5 @@ for bs,batch_size in enumerate(batch_sizes):
         model_path = f'models/batch_sizes/bs_{batch_size}_ns_{num_steps}_'
         model = LSTM(n_hidden=n_hidden, n_layers=n_layers)
         optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
-        model = train(model,optimizer,x_train,y_train,x_val,y_val,epochs,batch_size,num_steps,n_hidden,device,scores_path,model_path)
+        model = train(model,optimizer,x_train,y_train,x_val,y_val,epochs,batch_size,num_steps,n_hidden,n_layers,device,scores_path,model_path)
         print()

@@ -18,6 +18,7 @@ def train(
         batch_size: int,
         num_steps: int,
         hidden_size: int,
+        num_layers,
         device: str,
         scores_path: str,
         model_path: str
@@ -49,8 +50,8 @@ def train(
     for epoch in range(epochs):
         model.train()
         epoch_start = time.time()
-        hidden_state = torch.zeros(1,batch_size,hidden_size).to(device)
-        cell_state = torch.zeros(1,batch_size,hidden_size).to(device)
+        hidden_state = torch.zeros(num_layers,batch_size,hidden_size).to(device)
+        cell_state = torch.zeros(num_layers,batch_size,hidden_size).to(device)
         print('epoch: %d' % epoch)
         losses = []
 
@@ -79,8 +80,8 @@ def train(
         model.eval()
 
         val_losses = []
-        val_hidden_state = torch.zeros(1,batch_size,hidden_size).to(device)
-        val_cell_state = torch.zeros(1,batch_size,hidden_size).to(device)
+        val_hidden_state = torch.zeros(num_layers,batch_size,hidden_size).to(device)
+        val_cell_state = torch.zeros(num_layers,batch_size,hidden_size).to(device)
         for i,(vx,vy) in enumerate(zip(x_val_batched,y_val_batched)):
             print(i,end='\r')
             val_state = (val_hidden_state,val_cell_state)

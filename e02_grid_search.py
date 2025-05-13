@@ -27,7 +27,7 @@ y_val = y[train_samples:train_samples+val_samples]
 
 learning_rate = 0.001
 epochs = 25
-num_steps = 200
+num_steps = 100
 batch_size = 200
 filters = 16
 strides = 1
@@ -48,7 +48,7 @@ for ln,num_layers in enumerate(layers_nums):
         
         lstm_model = LSTM(n_hidden=num_hidden, n_layers=num_layers)
         lstm_optimizer = torch.optim.Adam(lstm_model.parameters(), lr=learning_rate)
-        lstm_model = train(lstm_model,lstm_optimizer,x_train,y_train,x_val,y_val,epochs,batch_size,num_steps,num_hidden,device,scores_path,model_path)
+        lstm_model = train(lstm_model,lstm_optimizer,x_train,y_train,x_val,y_val,epochs,batch_size,num_steps,num_hidden,num_layers,device,scores_path,model_path)
         print()
 
         print('single conv')
@@ -57,7 +57,7 @@ for ln,num_layers in enumerate(layers_nums):
         
         sc_model = SingleConvLSTM(n_conv_outs=filters, s_kernel=kernel_size, n_stride=strides, n_hidden=num_hidden, n_layers=num_layers)
         sc_optimizer = torch.optim.Adam(sc_model.parameters(), lr=learning_rate)
-        sc_model = train(sc_model, sc_optimizer, x_train, y_train, x_val, y_val, epochs, batch_size, num_steps, num_hidden, device, scores_path, model_path)
+        sc_model = train(sc_model, sc_optimizer, x_train, y_train, x_val, y_val, epochs, batch_size, num_steps, num_hidden,num_layers, device, scores_path, model_path)
         print()
 
         print('double conv')
@@ -66,5 +66,5 @@ for ln,num_layers in enumerate(layers_nums):
         
         dc_model = DoubleConvLSTM(n_conv_outs=filters, s_kernel=kernel_size, n_stride=strides, n_hidden=num_hidden, n_layers=num_layers)
         dc_optimizer = torch.optim.Adam(dc_model.parameters(), lr=learning_rate)
-        dc_model = train(dc_model, dc_optimizer, x_train, y_train, x_val, y_val, epochs, batch_size, num_steps, num_hidden, device, scores_path, model_path)
+        dc_model = train(dc_model, dc_optimizer, x_train, y_train, x_val, y_val, epochs, batch_size, num_steps, num_hidden,num_layers, device, scores_path, model_path)
         print()

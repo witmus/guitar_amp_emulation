@@ -87,7 +87,7 @@ class DoubleConvLSTM(nn.Module):
         x = self.conv1(x)
         x = self.conv2(x)
         x = x.permute(0, 2, 1)
-        lstm_out, h_s, c_s = self.lstm(x, state)
+        lstm_out, (h_s, c_s) = self.lstm(x, state)
         outs = []
         for ts in range(lstm_out.size(1)):
             outs.append(self.out(lstm_out[:,ts,:]))
