@@ -31,7 +31,10 @@ learning_rate = 0.001
 epochs = 25
 device = "cuda" if torch.cuda.is_available() else "cpu"
 print(device)
-batch_sizes = [100,200,300,400,500]
+# batch_sizes = [100,200,300,400,500]
+# steps_nums = [300]
+
+batch_sizes = [500]
 steps_nums = [100,200,300]
 
 for bs,batch_size in enumerate(batch_sizes):

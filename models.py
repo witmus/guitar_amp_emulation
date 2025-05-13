@@ -14,7 +14,7 @@ class LSTM(nn.Module):
 
         self.out = nn.Linear(n_hidden,1)
 
-    def forward(self, x, state):
+    def forward(self, x, state=None):
         r_out, (h_s, c_s) = self.lstm(x, state)
         outs = []
         for ts in range(r_out.size(1)):

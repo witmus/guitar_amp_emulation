@@ -43,13 +43,10 @@ def train(
 
     epochs_losses = []
 
+    scores = np.zeros(shape=(epochs,5))
 
-    scores = np.zeros(shape=(epochs,4))
-
+    model.to(device)
     for epoch in range(epochs):
-        if device == 'cuda':
-            model.to(device)
-
         model.train()
         epoch_start = time.time()
         hidden_state = torch.zeros(1,batch_size,hidden_size).to(device)
@@ -80,27 +77,25 @@ def train(
         epochs_losses.append(mean_loss)
 
         model.eval()
-        if device == 'cuda':
-            model.to('cpu')
 
         val_losses = []
-        val_hidden_state = torch.zeros(1,batch_size,hidden_size)
-        val_cell_state = torch.zeros(1,batch_size,hidden_size)
-        val_state = (val_hidden_state,val_cell_state)
-        with profile(activities=[ProfilerActivity.CPU], record_shapes=True) as prof:
-            with record_function("model_inference"):
-                for vx,vy in zip(x_val_batched,y_val_batched):
-                    test,val_hidden_state,val_cell_state = model(vx,val_state)
-                    val_losses.append(loss_fn(test,vy).item())
+        val_hidden_state = torch.zeros(1,batch_size,hidden_size).to(device)
+        val_cell_state = torch.zeros(1,batch_size,hidden_size).to(device)
+        for i,(vx,vy) in enumerate(zip(x_val_batched,y_val_batched)):
+            print(i,end='\r')
+            val_state = (val_hidden_state,val_cell_state)
+            test,val_hidden_state,val_cell_state = model(vx.to(device), val_state)
+            val_losses.append(loss_fn(test,vy.to(device)).item())
         
-        torch.save(model.state_dict(), model_path + f'checkpoint_{epoch}.pth')
         val_loss = np.mean(val_losses)
         print('val loss: %f' % val_loss)
         scores[epoch,0] = mean_loss
         scores[epoch,1] = val_loss
         scores[epoch,2] = epoch_time
-        scores[epoch,3] = prof.key_averages().self_cpu_time_total
+        # scores[epoch,3] = prof.key_averages().self_cpu_time_total
+        # scores[epoch,4] = sum([i.cuda_time for i in prof.key_averages()])
         
+        torch.save(model.state_dict(), model_path + f'checkpoint_{epoch}.pth')
         np.save(scores_path,scores)
 
     return model

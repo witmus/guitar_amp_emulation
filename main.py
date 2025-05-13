@@ -34,7 +34,4 @@ from train import train
 from models import LSTM
 model = LSTM(n_hidden=64,n_layers=1)
 optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
-try:
-    model = train(model,optimizer,x_train,y_train,x_val,y_val,10,100,200,64,'cuda','temporary/temp','temporary/')
-except Exception as e:
-    print(e)
+model = train(model,optimizer,x_train,y_train,x_val,y_val,10,100,200,64,'cuda','temporary/temp','temporary/')
