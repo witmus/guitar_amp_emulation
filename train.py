@@ -35,10 +35,11 @@ def train(
         X_val = torch.concatenate((X_val,torch.zeros(val_padding)))
         Y_val = torch.concatenate((Y_val,torch.zeros(val_padding)))
 
-    x_val_batched = X_val.view(-1,batch_size,num_steps,1)
-    y_val_batched = Y_val.view(-1,batch_size,num_steps,1)
+    # x_val_batched = X_val.view(-1,batch_size,num_steps,1)
+    # y_val_batched = Y_val.view(-1,batch_size,num_steps,1)
 
     train_batches = int(train_samples / samples_per_batch)
+    val_batches = int(X_val.size(0) / samples_per_batch)
 
     loss_fn = ESRDCLoss()
 
@@ -78,16 +79,25 @@ def train(
         epochs_losses.append(mean_loss)
 
         model.eval()
+        del x
+        del y
+        del hidden_state
+        del cell_state
+        torch.cuda.empty_cache()
 
-        val_losses = []
-        val_hidden_state = torch.zeros(num_layers,batch_size,hidden_size).to(device)
-        val_cell_state = torch.zeros(num_layers,batch_size,hidden_size).to(device)
-        for i,(vx,vy) in enumerate(zip(x_val_batched,y_val_batched)):
-            print(i,end='\r')
-            val_state = (val_hidden_state,val_cell_state)
-            test,val_hidden_state,val_cell_state = model(vx.to(device), val_state)
-            val_losses.append(loss_fn(test,vy.to(device)).item())
-        
+        with torch.no_grad():
+            val_losses = []
+            val_hidden_state = torch.zeros(num_layers,batch_size,hidden_size).to(device)
+            val_cell_state = torch.zeros(num_layers,batch_size,hidden_size).to(device)
+            for i,vb in enumerate(range(val_batches)):
+                print(i,end='\r')
+                val_offset = vb * samples_per_batch
+                val_x_batch = X_val[val_offset:val_offset + samples_per_batch].view(batch_size,num_steps,1).to(device)
+                val_y_batch = Y_val[val_offset:val_offset + samples_per_batch].view(batch_size,num_steps,1).to(device)
+                val_state = (val_hidden_state,val_cell_state)
+                test,val_hidden_state,val_cell_state = model(val_x_batch, val_state)
+                val_losses.append(loss_fn(test,val_y_batch).item())
+            
         val_loss = np.mean(val_losses)
         print('val loss: %f' % val_loss)
         scores[epoch,0] = mean_loss
@@ -98,5 +108,7 @@ def train(
         
         torch.save(model.state_dict(), model_path + f'checkpoint_{epoch}.pth')
         np.save(scores_path,scores)
+
+        torch.cuda.empty_cache()
 
     return model

@@ -11,8 +11,8 @@ dry = normalize_tensor(dry)
 crunch = get_crunch_tensor()
 crunch = normalize_tensor(crunch)
 
-train_time_seconds = 2 * 60
-val_time_seconds = 0.5 * 60
+train_time_seconds = 4 * 60
+val_time_seconds = 1 * 60
 train_samples = int(44_100 * train_time_seconds)
 val_samples = int(44_100 * val_time_seconds)
 
@@ -34,7 +34,7 @@ strides = 1
 kernel_size = 11
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
-hidden_nums = [64,128,256]
+hidden_nums = [192,256]
 layers_nums = [1,2]
 
 for ln,num_layers in enumerate(layers_nums):
