@@ -42,7 +42,7 @@ class SingleConvLSTM(nn.Module):
 
         self.out = nn.Linear(n_hidden, 1)
 
-    def forward(self, x, state):
+    def forward(self, x, state=None):
         x = x.permute(0, 2, 1)
         x = self.conv1(x)
         x = x.permute(0, 2, 1)
@@ -82,7 +82,7 @@ class DoubleConvLSTM(nn.Module):
 
         self.out = nn.Linear(n_hidden, 1)
 
-    def forward(self, x, state):
+    def forward(self, x, state=None):
         x = x.permute(0, 2, 1)
         x = self.conv1(x)
         x = self.conv2(x)
