@@ -79,10 +79,6 @@ def train(
         epochs_losses.append(mean_loss)
 
         model.eval()
-        del x
-        del y
-        del hidden_state
-        del cell_state
         torch.cuda.empty_cache()
 
         with torch.no_grad():
