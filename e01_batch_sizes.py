@@ -2,48 +2,59 @@ import torch
 import torch.nn as nn
 import torchaudio
 
-from audio import get_clean_tensor,get_crunch_tensor,get_distortion_tensor,normalize_tensor
+from audio import get_clean_tensor,get_crunch_tensor
+from models import WindowLSTM
+import styles_ranges as sr
 from train import train
-from models import LSTM
+from windows import get_sw_paired_dataloader
 
 dry = get_clean_tensor()
-dry = normalize_tensor(dry)
 crunch = get_crunch_tensor()
-crunch = normalize_tensor(crunch)
 
-train_time_seconds = 2 * 60
-val_time_seconds = 0.5 * 60
-train_samples = int(44_100 * train_time_seconds)
-val_samples = int(44_100 * val_time_seconds)
+train_data_start = sr.SINGLES_RING_OUT_START
+train_data_end = sr.POWER_CHORDS_RING_OUT_END
 
-x = dry[0]
-y = crunch[0]
+val_data_start = sr.CHORDS_ARPEGGIO_START
+val_data_end = sr.CHORDS_ARPEGGIO_START + 36 * 44100
 
-x_train = x[:train_samples]
-y_train = y[:train_samples]
+x_train = dry[train_data_start:train_data_end]
+y_train = crunch[train_data_start:train_data_end]
 
-x_val = x[train_samples:train_samples+val_samples]
-y_val = y[train_samples:train_samples+val_samples]
+x_val = dry[val_data_start:val_data_end]
+y_val = crunch[val_data_start:val_data_end]
+
+device = "cuda" if torch.cuda.is_available() else "cpu"
+
+if device == "cuda":
+    x_train = x_train.pin_memory()
+    y_train = y_train.pin_memory()
+    x_val = x_val.pin_memory()
+    y_val = y_val.pin_memory()
 
 n_hidden = 128
 n_layers = 1
+n_filters = 16
+n_strides = 1
+kernel_size = 11
+
 learning_rate = 0.001
 epochs = 25
-device = "cuda" if torch.cuda.is_available() else "cpu"
-print(device)
-# batch_sizes = [100,200,300,400,500]
-# steps_nums = [300]
 
-batch_sizes = [500]
-steps_nums = [100,200,300]
+batch_sizes = [250, 500, 750, 1000]
+window_sizes = [200, 300, 400, 500]
 
 for bs,batch_size in enumerate(batch_sizes):
-    for ns,num_steps in enumerate(steps_nums): 
-        print(f'bs: {batch_size} ns: {num_steps}')
+    for ns,window_size in enumerate(window_sizes): 
+        print(f'bs: {batch_size} ns: {window_size}')
         print()
-        scores_path = f'scores/batch_sizes/bs_{batch_size}_ns_{num_steps}.npy'
-        model_path = f'models/batch_sizes/bs_{batch_size}_ns_{num_steps}_'
-        model = LSTM(n_hidden=n_hidden, n_layers=n_layers)
+        train_dataloader = get_sw_paired_dataloader(x_train,y_train, window_size, batch_size)
+        val_dataloader = get_sw_paired_dataloader(x_val,y_val, window_size, batch_size)
+
+        scores_path = f'scores/batch_sizes/bs_{batch_size}_ns_{window_size}.npy'
+        model_path = f'models/batch_sizes/bs_{batch_size}_ns_{window_size}_'
+
+        model = WindowLSTM(n_filters,kernel_size,n_strides,n_hidden,n_layers)
         optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
-        model = train(model,optimizer,x_train,y_train,x_val,y_val,epochs,batch_size,num_steps,n_hidden,n_layers,device,scores_path,model_path)
+
+        model = train(model,optimizer,train_dataloader,val_dataloader,epochs,device,scores_path,model_path)
         print()

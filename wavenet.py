@@ -22,12 +22,13 @@ def _conv_stack(dilations, in_channels, out_channels, kernel_size):
 
 
 class WaveNet(nn.Module):
-    def __init__(self, num_channels, dilation_depth, num_repeat, kernel_size=2):
+    def __init__(self, num_channels, dilation_depth, num_repeat, kernel_size=2,window_size=4000):
         super(WaveNet, self).__init__()
         dilations = [2 ** d for d in range(dilation_depth)] * num_repeat
         self.convs_sigm = _conv_stack(dilations, 1, num_channels, kernel_size)
         self.convs_tanh = _conv_stack(dilations, 1, num_channels, kernel_size)
         self.residuals = _conv_stack(dilations, num_channels, num_channels, 1)
+        self.window_size = window_size
 
         self.linear_mix = nn.Conv1d(
             in_channels=num_channels * dilation_depth * num_repeat,
@@ -53,5 +54,5 @@ class WaveNet(nn.Module):
         # modified "postprocess" step:
         out = torch.cat([s[:, :, -out.size(2) :] for s in skips], dim=1)
         out = self.linear_mix(out)
-        return out
+        return out[:,:,-self.window_size:]
     

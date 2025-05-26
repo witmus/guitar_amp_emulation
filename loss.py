@@ -39,3 +39,18 @@ class ESRDCLoss(torch.nn.Module):
         loss += torch.mul(self.dc(pred, target), 1 - self.esr_weight)
         return loss
     
+class ESRDistillationLoss(torch.nn.Module):
+    def __init__(self, esr_weight=0.8, alpha=0.8):
+        super(ESRDistillationLoss, self).__init__()
+        self.esr = ESRLoss()
+        self.dc = DCLoss()
+        self.esr_weight = esr_weight
+        self.alpha = alpha
+
+    def forward(self, pred, target, teacher):
+        loss = torch.mul(self.esr(pred, target), self.esr_weight)
+        loss += torch.mul(self.dc(pred, target), 1 - self.esr_weight)
+        loss *= (1 - self.alpha)
+        loss += (torch.mul(self.esr(pred, target), self.esr_weight) + torch.mul(self.dc(pred, target), 1 - self.esr_weight)) * self.alpha
+        return loss
+    
