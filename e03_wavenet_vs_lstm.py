@@ -3,8 +3,9 @@ import torch
 from sklearn.model_selection import RepeatedKFold
 
 from audio import get_clean_tensor,get_crunch_tensor,get_distortion_tensor,normalize_tensor
-from train_cv import train_cv
+from train_cv_lstm import train_cv_lstm
 import styles_ranges as sr
+from train_cv_wavenet import train_cv_wavenet
 from windows import get_sw_paired_dataloader, get_wavenet_paired_dataloader
 
 from models import WindowLSTM
@@ -77,7 +78,7 @@ for i,(train,val) in enumerate(rkf.split(range(folds))):
     
     lstm_model = WindowLSTM(n_conv_outs=filters,s_kernel=kernel_size,n_stride=strides,n_hidden=num_hidden, n_layers=num_layers)
     lstm_optimizer = torch.optim.Adam(lstm_model.parameters(), lr=learning_rate)
-    lstm_model = train_cv(lstm_model, lstm_optimizer, lstm_train_dataloader, lstm_val_dataloader, epochs, device, lstm_scores_path, lstm_model_path, i)
+    lstm_model = train_cv_lstm(lstm_model, lstm_optimizer, lstm_train_dataloader, lstm_val_dataloader, epochs, device, lstm_scores_path, lstm_model_path, i)
     print()
     
     print("wavenet")
@@ -86,6 +87,6 @@ for i,(train,val) in enumerate(rkf.split(range(folds))):
 
     wavenet_model = WaveNet(wn_channels, wn_dilation_depth, wn_repeats, wn_kernel_size)
     wavenet_optimizer = torch.optim.Adam(wavenet_model.parameters(), lr=learning_rate)
-    wavenet_model = train_cv(wavenet_model, wavenet_optimizer, wavenet_train_dataloader, wavenet_val_dataloader, epochs, device, wn_scores_path, wn_model_path, i)
+    wavenet_model = train_cv_wavenet(wavenet_model, wavenet_optimizer, wavenet_train_dataloader, wavenet_val_dataloader, epochs, device, wn_scores_path, wn_model_path, i)
     
     print()

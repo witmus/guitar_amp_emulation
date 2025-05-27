@@ -12,12 +12,10 @@ dry = get_clean_tensor()
 crunch = get_crunch_tensor()
 
 train_data_start = sr.SINGLES_RING_OUT_START
-train_data_end = sr.SINGLES_RING_OUT_START + 24 * 44100
-# train_data_end = sr.POWER_CHORDS_RING_OUT_END
+train_data_end = sr.SINGLES_RING_OUT_START + 48 * 44100
 
 val_data_start = sr.CHORDS_ARPEGGIO_START
-# val_data_end = sr.CHORDS_ARPEGGIO_START + 36 * 44100
-val_data_end = sr.CHORDS_ARPEGGIO_START + 6 * 44100
+val_data_end = sr.CHORDS_ARPEGGIO_START + 12 * 44100
 
 x_train = dry[train_data_start:train_data_end]
 y_train = crunch[train_data_start:train_data_end]
@@ -42,7 +40,7 @@ kernel_size = 11
 learning_rate = 0.001
 epochs = 25
 
-batch_sizes = [1000, 1500, 2000]
+batch_sizes = [500, 1000, 1500]
 window_sizes = [200, 400, 600]
 
 torch.manual_seed(22150)
