@@ -43,6 +43,8 @@ hidden_nums = [64,96,128,160]
 filter_sizes = [12,16,20]
 layers_nums = [1,2]
 
+torch.manual_seed(22150)
+
 for ln,num_layers in enumerate(layers_nums):
     for fs,filter_size in enumerate(filter_sizes):
         for hn,num_hidden in enumerate(hidden_nums):

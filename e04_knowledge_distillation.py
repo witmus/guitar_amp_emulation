@@ -83,6 +83,8 @@ wavenet_from_lstm_scores_path = f'scores/knowledge_distillation/wavenet_from_lst
 wavenet_from_lstm_model_path = f'models/knowledge_distillation/students/wavenet_from_lstm'
 np.save(wavenet_from_lstm_scores_path, wavenet_from_lstm_scores)
 
+torch.manual_seed(22150)
+
 for i,(train,val) in enumerate(rkf.split(range(folds))):
     print(f'fold: {i}')
     print()

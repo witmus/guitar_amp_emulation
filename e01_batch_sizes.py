@@ -42,8 +42,10 @@ kernel_size = 11
 learning_rate = 0.001
 epochs = 25
 
-batch_sizes = [750, 1000, 1250]
+batch_sizes = [500, 1000, 1500]
 window_sizes = [400, 600, 800]
+
+torch.manual_seed(22150)
 
 for bs,batch_size in enumerate(batch_sizes):
     for ns,window_size in enumerate(window_sizes): 
