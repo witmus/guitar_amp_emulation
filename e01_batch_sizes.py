@@ -12,10 +12,12 @@ dry = get_clean_tensor()
 crunch = get_crunch_tensor()
 
 train_data_start = sr.SINGLES_RING_OUT_START
-train_data_end = sr.POWER_CHORDS_RING_OUT_END
+train_data_end = sr.SINGLES_RING_OUT_START + 24 * 44100
+# train_data_end = sr.POWER_CHORDS_RING_OUT_END
 
 val_data_start = sr.CHORDS_ARPEGGIO_START
-val_data_end = sr.CHORDS_ARPEGGIO_START + 36 * 44100
+# val_data_end = sr.CHORDS_ARPEGGIO_START + 36 * 44100
+val_data_end = sr.CHORDS_ARPEGGIO_START + 6 * 44100
 
 x_train = dry[train_data_start:train_data_end]
 y_train = crunch[train_data_start:train_data_end]
@@ -33,15 +35,15 @@ if device == "cuda":
 
 n_hidden = 128
 n_layers = 1
-n_filters = 16
+n_filters = 32
 n_strides = 1
 kernel_size = 11
 
 learning_rate = 0.001
 epochs = 25
 
-batch_sizes = [250, 500, 750, 1000]
-window_sizes = [200, 300, 400, 500]
+batch_sizes = [750, 1000, 1250]
+window_sizes = [400, 600, 800]
 
 for bs,batch_size in enumerate(batch_sizes):
     for ns,window_size in enumerate(window_sizes): 

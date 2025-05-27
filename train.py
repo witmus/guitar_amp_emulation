@@ -25,7 +25,7 @@ def train(
 
     epochs_losses = []
 
-    scores = np.zeros(shape=(epochs,5))
+    scores = np.zeros(shape=(epochs,7))
 
     model.to(device)
     for epoch in range(epochs):
@@ -40,12 +40,11 @@ def train(
 
             pred,_,_ = model(x_t.to(device))
             loss = loss_fn(pred, y_t.to(device))
+            loss.backward()
+            optimizer.step()
 
             loss_value = loss.item()
             losses.append(loss_value)
-            loss.backward()
-
-            optimizer.step()
 
             print('batch: ',i,' loss: ', loss_value, end='\r')
 

@@ -38,14 +38,12 @@ def distill(
             distillation_loss = loss_fn(pred,t_t.to(device)) * alpha
             ground_truth_loss = loss_fn(pred,y_t.to(device)) * beta
             loss = distillation_loss + ground_truth_loss
-
             loss.backward()
+            optimizer.step()
 
             ground_truth_losses.append(ground_truth_loss.item())
             distillation_losses.append(distillation_loss.item())
-            
             total_losses.append(loss.item())
-            optimizer.step()
 
         d_loss_stats = get_stats(distillation_losses)
         gt_loss_stats = get_stats(ground_truth_losses)

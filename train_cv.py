@@ -27,7 +27,7 @@ def train_cv(
     model.to(device)
     for epoch in range(epochs):
         model.train()
-        print('epoch: %d' % epoch)
+        print('epoch: ', epoch)
         losses = []
         epoch_start = time.time()
 
@@ -37,10 +37,10 @@ def train_cv(
             pred,_,_ = model(x_t.to(device))
             loss = loss_fn(pred, y_t.to(device))
             loss.backward()
+            optimizer.step()
 
             loss_value = loss.item()
             losses.append(loss_value)
-            optimizer.step()
 
             print('batch: ', i, ' loss: ', loss_value, end='\r')
 

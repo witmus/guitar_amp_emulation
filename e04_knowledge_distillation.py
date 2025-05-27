@@ -63,22 +63,22 @@ if device == "cuda":
 
 rkf = RepeatedKFold(n_splits=folds,n_repeats=repeats,random_state=seed)
 
-lstm_from_lstm_scores = np.zeros(shape=(folds*repeats,epochs,17))
+lstm_from_lstm_scores = np.zeros(shape=(folds*repeats,epochs,16))
 lstm_from_lstm_scores_path = f'scores/knowledge_distillation/lstm_from_lstm.npy'
 lstm_from_lstm_model_path = f'models/knowledge_distillation/students/lstm_from_lstm'
 np.save(lstm_from_lstm_scores_path, lstm_from_lstm_scores)
 
-wavenet_from_wavenet_scores = np.zeros(shape=(folds*repeats,epochs,17))
+wavenet_from_wavenet_scores = np.zeros(shape=(folds*repeats,epochs,16))
 wavenet_from_wavenet_scores_path = f'scores/knowledge_distillation/wavenet_from_wavenet.npy'
 wavenet_from_wavenet_model_path = f'models/knowledge_distillation/students/wavenet_from_wavenet'
 np.save(wavenet_from_wavenet_scores_path, wavenet_from_wavenet_scores)
 
-lstm_from_wavenet_scores = np.zeros(shape=(folds*repeats,epochs,17))
+lstm_from_wavenet_scores = np.zeros(shape=(folds*repeats,epochs,16))
 lstm_from_wavenet_scores_path = f'scores/knowledge_distillation/lstm_from_wavenet.npy'
 lstm_from_wavenet_model_path = f'models/knowledge_distillation/students/lstm_from_wavenet'
 np.save(lstm_from_wavenet_scores_path, lstm_from_wavenet_scores)
 
-wavenet_from_lstm_scores = np.zeros(shape=(folds*repeats,epochs,17))
+wavenet_from_lstm_scores = np.zeros(shape=(folds*repeats,epochs,16))
 wavenet_from_lstm_scores_path = f'scores/knowledge_distillation/wavenet_from_lstm.npy'
 wavenet_from_lstm_model_path = f'models/knowledge_distillation/students/wavenet_from_lstm'
 np.save(wavenet_from_lstm_scores_path, wavenet_from_lstm_scores)
