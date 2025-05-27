@@ -31,14 +31,14 @@ if device == "cuda":
     x_val = x_val.pin_memory()
     y_val = y_val.pin_memory()
 
-n_hidden = 128
+n_hidden = 64
 n_layers = 1
 n_filters = 32
 n_strides = 1
 kernel_size = 11
 
 learning_rate = 0.001
-epochs = 25
+epochs = 10
 
 batch_sizes = [500, 1000, 1500]
 window_sizes = [200, 400, 600]
