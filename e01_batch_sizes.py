@@ -40,8 +40,8 @@ kernel_size = 11
 learning_rate = 0.001
 epochs = 10
 
-batch_sizes = [500, 1000, 1500]
-window_sizes = [200, 400, 600]
+batch_sizes = [500, 1000, 1500, 2000]
+window_sizes = [200, 400, 600, 800]
 
 torch.manual_seed(22150)
 
