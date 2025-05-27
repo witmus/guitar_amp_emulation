@@ -15,8 +15,8 @@ class WindowArray(Sequence):
 
 class WindowPairedArray(Sequence):
     def __init__(self, x, y, window_len):
-        self.x = torch.concat((torch.zeros(window_len - 1),x))
-        self.y = y
+        self.x = x
+        self.y = y[window_len-1:]
         self.window_len = window_len
         
     def __len__(self):
@@ -29,9 +29,9 @@ class WindowPairedArray(Sequence):
 
 class WindowPairedTeacherArray(Sequence):
     def __init__(self, x, y, t, window_len):
-        self.x = torch.concat((torch.zeros(window_len - 1),x))
-        self.y = y
-        self.t = t
+        self.x = x
+        self.y = y[window_len-1:]
+        self.t = t[window_len-1:]
         self.window_len = window_len
         
     def __len__(self):
