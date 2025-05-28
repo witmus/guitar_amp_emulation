@@ -37,7 +37,7 @@ def train_cv_wavenet(
             optimizer.zero_grad()
 
             pred = model(x_t.to(device))
-            loss = loss_fn(pred, y_t[:,:,-pred.size(2) :])
+            loss = loss_fn(pred, y_t[:,:,-pred.size(2) :].to(device))
             loss.backward()
             optimizer.step()
 
@@ -60,7 +60,7 @@ def train_cv_wavenet(
             for i,(x_v,y_v) in enumerate(val_dataloader):
                 print(i,end='\r')
                 test = model(x_v)
-                val_losses.append(loss_fn(test,y_v[:,:,-test.size(2) :]).item())
+                val_losses.append(loss_fn(test,y_v[:,:,-test.size(2) :].to(device)).item())
             
         val_loss = np.mean(val_losses)
         val_std = np.mean(val_losses)
