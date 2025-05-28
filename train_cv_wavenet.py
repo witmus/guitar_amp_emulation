@@ -26,6 +26,7 @@ def train_cv_wavenet(
     scores = np.load(scores_path)
 
     model.to(device)
+    train_batches = len(train_dataloader)
     for epoch in range(epochs):
         model.train()
         print('epoch: ', epoch)
@@ -43,7 +44,7 @@ def train_cv_wavenet(
             loss_value = loss.item()
             losses.append(loss_value)
 
-            print('batch: ', i, ' loss: ', loss_value, end='\r')
+            print('batch: ', i, '/', train_batches, ' loss: ', loss_value, end='\r')
 
         epoch_time = time.time() - epoch_start
         epoch_stats = get_stats(losses)
@@ -62,11 +63,13 @@ def train_cv_wavenet(
                 val_losses.append(loss_fn(test,y_v[:,:,-test.size(2) :]).item())
             
         val_loss = np.mean(val_losses)
+        val_std = np.mean(val_losses)
         print('val loss: ', val_loss)
         
         scores[fold,epoch,:5] = epoch_stats
         scores[fold,epoch,5] = val_loss
-        scores[fold,epoch,6] = epoch_time
+        scores[fold,epoch,6] = val_std
+        scores[fold,epoch,7] = epoch_time
 
         #todo: setup seperate experiment for time inference
         # scores[epoch,7] = prof.key_averages().self_cpu_time_total

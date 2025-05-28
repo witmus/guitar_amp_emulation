@@ -12,20 +12,20 @@ from models import WindowLSTM
 from wavenet import WaveNet
 
 learning_rate = 0.001
-epochs = 15
-window_size = tbd
-batch_size = tbd
+epochs = 10
+window_size = 600
+batch_size = 2000
 
-num_layers = tbd
-num_hidden = tbd
-filters = tbd
+num_layers = 1
+num_hidden = 128
+filters = 24
 strides = 1
 kernel_size = 11
 
 #100 ms per batch
 wn_steps = 4000
-wn_batch_size = 64
-wn_channels = tbd
+wn_batch_size = 5
+wn_channels = 32
 wn_dilation_depth = 8
 wn_repeats = 3
 wn_kernel_size = 3
@@ -38,32 +38,33 @@ dry = get_clean_tensor()
 crunch = get_crunch_tensor()
 
 data_start = sr.SINGLES_RING_OUT_START
-data_end = sr.CHORDS_ARPEGGIO_END
+data_end = sr.SINGLES_RING_OUT_START + 60 * 44100
 
-x = dry[data_start:data_end].view(folds,-1)
-y = crunch[data_start:data_end].view(folds,-1)
+x = dry[data_start:data_end].view(folds * 2, -1)
+y = crunch[data_start:data_end].view(folds * 2, -1)
 
-device = "cuda" if torch.cuda.is_available() else "cpu"
-
-if device == "cuda":
-    x = x.pin_memory()
-    y = y.pin_memory()
+if torch.cuda.is_available():
+    is_cuda = True
+    device = "cuda"
+else:
+    is_cuda = False
+    device = "cpu"
     
 rkf = RepeatedKFold(n_splits=folds,n_repeats=repeats,random_state=seed)
 
-lstm_scores = np.zeros(shape=(folds*repeats,epochs,7))
+lstm_scores = np.zeros(shape=(folds*repeats,epochs,8))
 lstm_scores_path = f'scores/wavenet_vs_lstm/lstm.npy'
 lstm_model_path = f'models/wavenet_vs_lstm/lstm_'
 np.save(lstm_scores_path,lstm_scores)
 
-wn_scores = np.zeros(shape=(folds*repeats,epochs,7))
+wn_scores = np.zeros(shape=(folds*repeats,epochs,8))
 wn_scores_path = f'scores/wavenet_vs_lstm/wavenet.npy'
 wn_model_path = f'models/wavenet_vs_lstm/wavenet_'
 np.save(wn_scores_path,wn_scores)
 
 torch.manual_seed(22150)
 
-for i,(train,val) in enumerate(rkf.split(range(folds))):
+for i,(train,val) in enumerate(rkf.split(range(folds * 2))):
     print(f'fold: {i}')
     print()
     x_train = x[train].flatten()
@@ -73,8 +74,8 @@ for i,(train,val) in enumerate(rkf.split(range(folds))):
     y_val = y[val].flatten()
 
     print('lstm')
-    lstm_train_dataloader = get_sw_paired_dataloader(x_train,y_train, window_size, batch_size)
-    lstm_val_dataloader = get_sw_paired_dataloader(x_val,y_val, window_size, batch_size)
+    lstm_train_dataloader = get_sw_paired_dataloader(x_train,y_train, window_size, batch_size, is_cuda)
+    lstm_val_dataloader = get_sw_paired_dataloader(x_val,y_val, window_size, batch_size, is_cuda)
     
     lstm_model = WindowLSTM(n_conv_outs=filters,s_kernel=kernel_size,n_stride=strides,n_hidden=num_hidden, n_layers=num_layers)
     lstm_optimizer = torch.optim.Adam(lstm_model.parameters(), lr=learning_rate)
@@ -82,8 +83,8 @@ for i,(train,val) in enumerate(rkf.split(range(folds))):
     print()
     
     print("wavenet")
-    wavenet_train_dataloader = get_wavenet_paired_dataloader(x_train,y_train, window_size, batch_size)
-    wavenet_val_dataloader = get_wavenet_paired_dataloader(x_val,y_val, window_size, batch_size)
+    wavenet_train_dataloader = get_wavenet_paired_dataloader(x_train,y_train, wn_steps, wn_batch_size, is_cuda)
+    wavenet_val_dataloader = get_wavenet_paired_dataloader(x_val,y_val, wn_steps, wn_batch_size, is_cuda)
 
     wavenet_model = WaveNet(wn_channels, wn_dilation_depth, wn_repeats, wn_kernel_size)
     wavenet_optimizer = torch.optim.Adam(wavenet_model.parameters(), lr=learning_rate)

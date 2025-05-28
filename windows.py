@@ -104,20 +104,39 @@ class WavenetPairedWindowTeacherArray(Sequence):
         return x_out, y_out, t_out
     
 
-def get_sw_dataloader(x: torch.Tensor, window_length: int, batch_size: int) -> DataLoader:
+def get_sw_dataloader(x: torch.Tensor, window_length: int, batch_size: int, is_cuda=True) -> DataLoader:
+    if is_cuda:
+        return DataLoader(WindowArray(x, window_length), batch_size, pin_memory=True, pin_memory_device="cuda")
+    
     return DataLoader(WindowArray(x, window_length), batch_size)
 
-def get_sw_paired_dataloader(x: torch.Tensor, y: torch.Tensor, window_length: int, batch_size: int) -> DataLoader:
+
+def get_sw_paired_dataloader(x: torch.Tensor, y: torch.Tensor, window_length: int, batch_size: int, is_cuda=True) -> DataLoader:
+    if is_cuda:
+        return DataLoader(WindowPairedArray(x, y, window_length), batch_size, pin_memory=True, pin_memory_device="cuda")
+
     return DataLoader(WindowPairedArray(x, y, window_length), batch_size)
 
-def get_sw_teacher_dataloader(x: torch.Tensor, y: torch.Tensor, t: torch.Tensor, window_length: int, batch_size: int) -> DataLoader:
+def get_sw_teacher_dataloader(x: torch.Tensor, y: torch.Tensor, t: torch.Tensor, window_length: int, batch_size: int, is_cuda=True) -> DataLoader:
+    if is_cuda:
+        return DataLoader(WindowPairedTeacherArray(x, y, t, window_length), batch_size, pin_memory=True, pin_memory_device="cuda")
+
     return DataLoader(WindowPairedTeacherArray(x, y, t, window_length), batch_size)
 
-def get_wavenet_dataloader(x: torch.Tensor, window_length: int, batch_size: int) -> DataLoader:
+def get_wavenet_dataloader(x: torch.Tensor, window_length: int, batch_size: int, is_cuda=True) -> DataLoader:
+    if is_cuda:
+        return DataLoader(WavenetWindowArray(x, window_length), batch_size, pin_memory=True, pin_memory_device="cuda")
+
     return DataLoader(WavenetWindowArray(x, window_length), batch_size)
 
-def get_wavenet_paired_dataloader(x: torch.Tensor, y: torch.Tensor, window_length: int, batch_size: int) -> DataLoader:
+def get_wavenet_paired_dataloader(x: torch.Tensor, y: torch.Tensor, window_length: int, batch_size: int, is_cuda=True) -> DataLoader:
+    if is_cuda:
+        return DataLoader(WavenetPairedWindowArray(x, y, window_length), batch_size, pin_memory=True, pin_memory_device="cuda")
+
     return DataLoader(WavenetPairedWindowArray(x, y, window_length), batch_size)
 
-def get_wavenet_teacher_dataloader(x: torch.Tensor, y: torch.Tensor, t: torch.Tensor, window_length: int, batch_size: int) -> DataLoader:
+def get_wavenet_teacher_dataloader(x: torch.Tensor, y: torch.Tensor, t: torch.Tensor, window_length: int, batch_size: int, is_cuda=True) -> DataLoader:
+    if is_cuda:
+        return DataLoader(WavenetPairedWindowTeacherArray(x, y, t, window_length), batch_size, pin_memory=True, pin_memory_device="cuda")
+    
     return DataLoader(WavenetPairedWindowTeacherArray(x, y, t, window_length), batch_size)

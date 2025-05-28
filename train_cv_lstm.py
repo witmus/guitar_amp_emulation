@@ -21,6 +21,7 @@ def train_cv_lstm(
         model_path: str,
         fold: int
     ):
+    train_batches = len(train_dataloader)
 
     loss_fn = ESRDCLoss()
     scores = np.load(scores_path)
@@ -34,17 +35,18 @@ def train_cv_lstm(
 
         epoch_start = time.time()
         for i,(x_t,y_t) in enumerate(train_dataloader):
+            y_t = y_t.unsqueeze(1).to(device)
             optimizer.zero_grad()
 
             pred,_,_ = model(x_t.to(device))
-            loss = loss_fn(pred, y_t.unsqueeze(1).to(device))
+            loss = loss_fn(pred, y_t)
             loss.backward()
             optimizer.step()
 
             loss_value = loss.item()
             losses.append(loss_value)
 
-            print('batch: ', i, ' loss: ', loss_value, end='\r')
+            print('batch: ', i, '/', train_batches, ' loss: ', loss_value, end='\r')
 
         epoch_time = time.time() - epoch_start
         epoch_stats = get_stats(losses)
@@ -59,14 +61,17 @@ def train_cv_lstm(
         with torch.no_grad():
             for i,(x_v,y_v) in enumerate(val_dataloader):
                 test,_,_ = model(x_v.to(device))
-                val_losses.append(loss_fn(test,y_v.unsqueeze(1).to(device)).item())
+                y_v = y_v.unsqueeze(1).to(device)
+                val_losses.append(loss_fn(test,y_v).item())
             
         val_loss = np.mean(val_losses)
+        val_std = np.mean(val_losses)
         print('val loss: ', val_loss)
         
         scores[fold,epoch,:5] = epoch_stats
         scores[fold,epoch,5] = val_loss
-        scores[fold,epoch,6] = epoch_time
+        scores[fold,epoch,6] = val_std
+        scores[fold,epoch,7] = epoch_time
         
         torch.save(model.state_dict(), model_path + f'checkpoint_{fold}_{epoch}.pth')
         np.save(scores_path,scores)
