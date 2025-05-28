@@ -59,7 +59,7 @@ def train_cv_wavenet(
         with torch.no_grad():
             for i,(x_v,y_v) in enumerate(val_dataloader):
                 print(i,end='\r')
-                test = model(x_v)
+                test = model(x_v.to(device))
                 val_losses.append(loss_fn(test,y_v[:,:,-test.size(2) :].to(device)).item())
             
         val_loss = np.mean(val_losses)
