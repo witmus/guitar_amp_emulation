@@ -33,7 +33,7 @@ if device == "cuda":
 
 n_hidden = 64
 n_layers = 1
-n_filters = 32
+n_filters = 24
 n_strides = 1
 kernel_size = 11
 
