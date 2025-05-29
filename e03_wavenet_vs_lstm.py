@@ -17,7 +17,7 @@ window_size = 600
 batch_size = 2000
 
 num_layers = 1
-num_hidden = 128
+num_hidden = 64
 filters = 24
 strides = 1
 kernel_size = 11
@@ -52,21 +52,27 @@ else:
     
 rkf = RepeatedKFold(n_splits=folds,n_repeats=repeats,random_state=seed)
 
-lstm_scores = np.zeros(shape=(folds*repeats,epochs,8))
+# lstm_scores = np.zeros(shape=(folds*repeats,epochs,8))
 lstm_scores_path = f'scores/wavenet_vs_lstm/lstm.npy'
 lstm_model_path = f'models/wavenet_vs_lstm/lstm_'
-np.save(lstm_scores_path,lstm_scores)
+# np.save(lstm_scores_path,lstm_scores)
+lstm_scores = np.load(lstm_scores_path)
 
-wn_scores = np.zeros(shape=(folds*repeats,epochs,8))
+# wn_scores = np.zeros(shape=(folds*repeats,epochs,8))
 wn_scores_path = f'scores/wavenet_vs_lstm/wavenet.npy'
 wn_model_path = f'models/wavenet_vs_lstm/wavenet_'
-np.save(wn_scores_path,wn_scores)
+# np.save(wn_scores_path,wn_scores)
+wn_scores = np.load(wn_scores_path)
 
 torch.manual_seed(22150)
+fold_checkpoint = 0
 
 for i,(train,val) in enumerate(rkf.split(range(folds * 2))):
     print(f'fold: {i}')
     print()
+    if i < fold_checkpoint:
+        continue
+    
     x_train = x[train].flatten()
     y_train = y[train].flatten()
 
@@ -82,12 +88,12 @@ for i,(train,val) in enumerate(rkf.split(range(folds * 2))):
     lstm_model = train_cv_lstm(lstm_model, lstm_optimizer, lstm_train_dataloader, lstm_val_dataloader, epochs, device, lstm_scores_path, lstm_model_path, i)
     print()
     
-    print("wavenet")
-    wavenet_train_dataloader = get_wavenet_paired_dataloader(x_train,y_train, wn_steps, wn_batch_size, is_cuda)
-    wavenet_val_dataloader = get_wavenet_paired_dataloader(x_val,y_val, wn_steps, wn_batch_size, is_cuda)
+    # print("wavenet")
+    # wavenet_train_dataloader = get_wavenet_paired_dataloader(x_train,y_train, wn_steps, wn_batch_size, is_cuda)
+    # wavenet_val_dataloader = get_wavenet_paired_dataloader(x_val,y_val, wn_steps, wn_batch_size, is_cuda)
 
-    wavenet_model = WaveNet(wn_channels, wn_dilation_depth, wn_repeats, wn_kernel_size)
-    wavenet_optimizer = torch.optim.Adam(wavenet_model.parameters(), lr=learning_rate)
-    wavenet_model = train_cv_wavenet(wavenet_model, wavenet_optimizer, wavenet_train_dataloader, wavenet_val_dataloader, epochs, device, wn_scores_path, wn_model_path, i)
+    # wavenet_model = WaveNet(wn_channels, wn_dilation_depth, wn_repeats, wn_kernel_size)
+    # wavenet_optimizer = torch.optim.Adam(wavenet_model.parameters(), lr=learning_rate)
+    # wavenet_model = train_cv_wavenet(wavenet_model, wavenet_optimizer, wavenet_train_dataloader, wavenet_val_dataloader, epochs, device, wn_scores_path, wn_model_path, i)
     
-    print()
+    # print()
