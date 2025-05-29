@@ -35,11 +35,10 @@ def train_cv_lstm(
 
         epoch_start = time.time()
         for i,(x_t,y_t) in enumerate(train_dataloader):
-            y_t = y_t.unsqueeze(1).to(device)
             optimizer.zero_grad()
 
             pred,_,_ = model(x_t.to(device))
-            loss = loss_fn(pred, y_t)
+            loss = loss_fn(pred, y_t.unsqueeze(1).to(device))
             loss.backward()
             optimizer.step()
 
@@ -61,8 +60,7 @@ def train_cv_lstm(
         with torch.no_grad():
             for i,(x_v,y_v) in enumerate(val_dataloader):
                 test,_,_ = model(x_v.to(device))
-                y_v = y_v.unsqueeze(1).to(device)
-                val_losses.append(loss_fn(test,y_v).item())
+                val_losses.append(loss_fn(test,y_v.unsqueeze(1).to(device)).item())
             
         val_loss = np.mean(val_losses)
         val_std = np.mean(val_losses)
