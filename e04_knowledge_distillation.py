@@ -9,7 +9,7 @@ from wavenet import WaveNet
 import styles_ranges as sr
 from windows import get_sw_teacher_dataloader, get_wavenet_teacher_dataloader, get_sw_paired_dataloader, get_wavenet_paired_dataloader
 
-from distill import distill 
+from distill_lstm import distill_lstm 
 
 learning_rate = 0.001
 epochs = 15
@@ -113,7 +113,7 @@ for i,(train,val) in enumerate(rkf.split(range(folds))):
     )
 
     lstm_student_optimizer = torch.optim.Adam(lstm_student_model.parameters(), lr=learning_rate)
-    lstm_student_model = distill(
+    lstm_student_model = distill_lstm(
         student=lstm_student_model,
         optimizer=lstm_student_optimizer,
         train_loader=lstm_train_dataloader,
@@ -139,7 +139,7 @@ for i,(train,val) in enumerate(rkf.split(range(folds))):
     )
 
     wavenet_student_optimizer = torch.optim.Adam(wavenet_student_model.parameters(), lr=learning_rate)
-    wavenet_student_model = distill(
+    wavenet_student_model = distill_lstm(
         student=wavenet_student_model,
         optimizer=wavenet_student_optimizer,
         train_loader=wavenet_train_dataloader,

@@ -6,7 +6,7 @@ import numpy as np
 from loss import ESRDCLoss
 from utilities import get_stats
 
-def distill(
+def distill_wavenet(
         student: torch.nn.Module,
         optimizer: Optimizer,
         train_loader: DataLoader,
@@ -31,12 +31,11 @@ def distill(
         student.train()
         print('epoch: ', epoch)
         for i,(x_t,y_t,t_t) in enumerate(train_loader):
-            print('batch: ', i, end='\r')
             optimizer.zero_grad()
-            pred,_,_ = student(x_t.to(device))
+            pred = student(x_t.to(device))
 
-            distillation_loss = loss_fn(pred,t_t.to(device)) * alpha
-            ground_truth_loss = loss_fn(pred,y_t.to(device)) * beta
+            distillation_loss = loss_fn(pred,t_t[:, :, -pred.size(2) :].to(device)) * alpha
+            ground_truth_loss = loss_fn(pred,y_t[:, :, -pred.size(2) :].to(device)) * beta
             loss = distillation_loss + ground_truth_loss
             loss.backward()
             optimizer.step()
@@ -44,6 +43,7 @@ def distill(
             ground_truth_losses.append(ground_truth_loss.item())
             distillation_losses.append(distillation_loss.item())
             total_losses.append(loss.item())
+            print('batch: ', i, 'loss: ', loss.item(), end='\r')
 
         d_loss_stats = get_stats(distillation_losses)
         gt_loss_stats = get_stats(ground_truth_losses)
@@ -58,8 +58,8 @@ def distill(
         
         with torch.no_grad():
             for i,(x_v,y_v) in enumerate(val_loader):
-                val_pred,_,_ = student(x_v.to(device))
-                val_loss = loss_fn(val_pred, y_v.to(device))
+                val_pred = student(x_v.to(device))
+                val_loss = loss_fn(val_pred, y_v[:,:,-pred.size(2) :].to(device))
                 val_losses.append(val_loss.item())
             
         val_mean_loss = np.mean(val_losses)
