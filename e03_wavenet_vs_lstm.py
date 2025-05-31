@@ -65,7 +65,7 @@ wn_model_path = f'models/wavenet_vs_lstm/wavenet_'
 wn_scores = np.load(wn_scores_path)
 
 torch.manual_seed(22150)
-fold_checkpoint = 3
+fold_checkpoint = 12
 
 for i,(train,val) in enumerate(rkf.split(range(folds * 2))):
     print(f'fold: {i}')

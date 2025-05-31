@@ -15,8 +15,8 @@ lstm_kernel_size = 11
 lstm_stride = 1
 lstm_hidden_size = 128
 lstm_layers = 1
-lstm_window_size = 2000
-lstm_batch_size = 600
+lstm_window_size = 600
+lstm_batch_size = 2000
 
 wn_steps = 4000
 wn_batch_size = 5
@@ -73,7 +73,7 @@ wavenet_teacher.eval()
 lstm_dataloader = get_sw_dataloader(x, lstm_window_size, lstm_batch_size, is_cuda)
 wavenet_dataloader = get_wavenet_dataloader(x, wn_steps, wn_batch_size, is_cuda)
 
-lstm_result = torch.tensor([])
+lstm_result = torch.tensor([]).to(device)
 with torch.no_grad():
     for i,x_t in enumerate(lstm_dataloader):
         print(i,'/',len(lstm_dataloader),end='\r')
@@ -83,7 +83,7 @@ with torch.no_grad():
 print(x.shape)
 print(lstm_result.shape)
 
-wavenet_result = torch.tensor([])
+wavenet_result = torch.tensor([]).to(device)
 with torch.no_grad():
     for i,x_t in enumerate(wavenet_dataloader):
         print(i+1,'/',len(wavenet_dataloader),end='\r')

@@ -33,15 +33,15 @@ else:
     device = "cpu"
 
 learning_rate = 0.001
-epochs = 15
+epochs = 20
 
 lstm_channels = 24
 lstm_kernel_size = 11
 lstm_stride = 1
 lstm_hidden_size = 128
 lstm_layers = 1
-lstm_window_size = 2000
-lstm_batch_size = 600
+lstm_window_size = 600
+lstm_batch_size = 2000
 
 wn_steps = 4000
 wn_batch_size = 5
@@ -58,10 +58,10 @@ wn_val_dataloader = get_wavenet_paired_dataloader(x_val, y_val, wn_steps, wn_bat
 
 torch.manual_seed(22150)
 
-print('wavenet')
-wavenet = WaveNet(wn_channels, wn_dilation_depth, wn_repeats, wn_kernel_size, wn_steps)
-wavenet_optimizer = torch.optim.Adam(wavenet.parameters(), learning_rate)
-train_wavenet(wavenet, wavenet_optimizer, wn_train_dataloader, wn_val_dataloader, epochs, device, 'models/knowledge_distillation/teachers/wavenet_')
+#print('wavenet')
+#wavenet = WaveNet(wn_channels, wn_dilation_depth, wn_repeats, wn_kernel_size, wn_steps)
+#wavenet_optimizer = torch.optim.Adam(wavenet.parameters(), learning_rate)
+#train_wavenet(wavenet, wavenet_optimizer, wn_train_dataloader, wn_val_dataloader, epochs, device, 'models/knowledge_distillation/teachers/wavenet_')
 
 print('lstm')
 lstm = WindowLSTM(lstm_channels, lstm_kernel_size, lstm_stride, lstm_hidden_size, lstm_layers)
