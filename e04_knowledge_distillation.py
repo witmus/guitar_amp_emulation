@@ -9,7 +9,8 @@ from wavenet import WaveNet
 import styles_ranges as sr
 from windows import get_sw_teacher_dataloader, get_wavenet_teacher_dataloader, get_sw_paired_dataloader, get_wavenet_paired_dataloader
 
-from distill_lstm import distill_lstm 
+from distill_lstm import distill_lstm
+from distill_wavenet import distill_wavenet
 
 learning_rate = 0.001
 epochs = 15
@@ -85,8 +86,11 @@ np.save(wavenet_from_wavenet_scores_path, wavenet_from_wavenet_scores)
 # np.save(wavenet_from_lstm_scores_path, wavenet_from_lstm_scores)
 
 torch.manual_seed(22150)
-
+fold_checkpoint = 22
 for i,(train,val) in enumerate(rkf.split(range(folds))):
+    if i < fold_checkpoint:
+	continue
+
     print(f'fold: {i}')
     print()
 
@@ -98,6 +102,32 @@ for i,(train,val) in enumerate(rkf.split(range(folds))):
 
     tl = t_lstm[train].flatten()
     tw = t_wn[train].flatten()
+
+    print('wavenet from wavenet')
+
+    wavenet_train_dataloader = get_wavenet_teacher_dataloader(x_train, y_train, tw, wavenet_steps, wavenet_batch_size, is_cuda)
+    wavenet_val_dataloader = get_wavenet_paired_dataloader(x_val, y_val, wavenet_steps, wavenet_batch_size, is_cuda)
+    
+    wavenet_student_model = WaveNet(
+        num_channels=wavenet_student_channels,
+        dilation_depth=wavenet_student_dilation_depth,
+        num_repeat=wavenet_student_repeats,
+        kernel_size=wavenet_student_kernel_size
+    )
+
+    wavenet_student_optimizer = torch.optim.Adam(wavenet_student_model.parameters(), lr=learning_rate)
+    wavenet_student_model = distill_wavenet(
+        student=wavenet_student_model,
+        optimizer=wavenet_student_optimizer,
+        train_loader=wavenet_train_dataloader,
+        val_loader=wavenet_val_dataloader,
+        epochs=epochs,
+        device=device,
+        scores_path=wavenet_from_wavenet_scores_path,
+        model_path=wavenet_from_wavenet_model_path,
+        fold=i
+    )
+    print()
     
     print('lstm from lstm')
 
@@ -126,30 +156,6 @@ for i,(train,val) in enumerate(rkf.split(range(folds))):
     )
     
     print()
-    print('wavenet from wavenet')
-
-    wavenet_train_dataloader = get_wavenet_teacher_dataloader(x_train, y_train, tw, wavenet_steps, wavenet_batch_size, is_cuda)
-    wavenet_val_dataloader = get_wavenet_paired_dataloader(x_val, y_val, wavenet_steps, wavenet_batch_size, is_cuda)
-    
-    wavenet_student_model = WaveNet(
-        num_channels=wavenet_student_channels,
-        dilation_depth=wavenet_student_dilation_depth,
-        num_repeat=wavenet_student_repeats,
-        kernel_size=wavenet_student_kernel_size
-    )
-
-    wavenet_student_optimizer = torch.optim.Adam(wavenet_student_model.parameters(), lr=learning_rate)
-    wavenet_student_model = distill_lstm(
-        student=wavenet_student_model,
-        optimizer=wavenet_student_optimizer,
-        train_loader=wavenet_train_dataloader,
-        val_loader=wavenet_val_dataloader,
-        epochs=epochs,
-        device=device,
-        scores_path=wavenet_from_wavenet_scores_path,
-        model_path=wavenet_from_wavenet_model_path,
-        fold=i
-    )
 
     # print()
     # print('lstm from wavenet')
