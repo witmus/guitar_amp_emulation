@@ -9,6 +9,14 @@ def normalize_tensor(tensor: torch.Tensor) -> torch.Tensor:
         tensor = tensor / max_val
     return tensor
 
+def get_dry_tensor(path: str) -> torch.Tensor:
+    tensor, _ = torchaudio.load(f'data/samples/clean/{path}_clean.wav')
+    return normalize_tensor(tensor[0])
+
+def get_wet_tensor(path: str) -> torch.Tensor:
+    tensor, _ = torchaudio.load(f'data/samples/processed/{path}_crunch.wav')
+    return normalize_tensor(tensor[0])
+
 def get_clean_tensor() -> torch.Tensor:
     tensor, _ = torchaudio.load('data/samples/clean/thesis_data_clean.wav')
     return normalize_tensor(tensor[0])

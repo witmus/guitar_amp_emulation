@@ -6,7 +6,7 @@ from typing import List
 
 from global_vars import SAMPLE_RATE
 
-def plot_waveform(waveform, sample_rate=SAMPLE_RATE, title='Waveform'):
+def plot_waveform(waveform, sample_rate=SAMPLE_RATE, title='Waveform', channel_titles=['c1', 'c2']):
     waveform = waveform.numpy()
 
     num_channels, num_frames = waveform.shape
@@ -16,10 +16,13 @@ def plot_waveform(waveform, sample_rate=SAMPLE_RATE, title='Waveform'):
     if num_channels == 1:
         axes = [axes]
     for c in range(num_channels):
+        axes[c].set_xlabel('Czas [s]')
         axes[c].plot(time_axis, waveform[c], linewidth=1)
         axes[c].grid(True)
         if num_channels > 1:
-            axes[c].set_ylabel(f"Channel {c+1}")
+            axes[c].set_ylabel(channel_titles[c])
+        else:
+            axes[c].set_ylabel('Poziom sygnału')
     figure.suptitle(title)
     plt.show()
 
