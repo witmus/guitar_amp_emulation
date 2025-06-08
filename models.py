@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 
 class WindowLSTM(nn.Module):
-    def __init__(self, n_conv_outs, s_kernel, n_stride, n_hidden, n_layers):
+    def __init__(self, n_conv_outs, s_kernel, n_stride, n_hidden, n_layers, n_pool=5):
         super(WindowLSTM, self).__init__()
         self.conv1 = nn.Conv1d(
             in_channels=1,
@@ -13,7 +13,7 @@ class WindowLSTM(nn.Module):
         )
 
         self.relu1 = nn.ReLU()
-        self.mp1 = nn.MaxPool1d(5)
+        self.mp1 = nn.MaxPool1d(n_pool)
         
         self.conv2 = nn.Conv1d(
             in_channels=n_conv_outs,
@@ -24,7 +24,7 @@ class WindowLSTM(nn.Module):
         )
 
         self.relu2 = nn.ReLU()
-        self.mp2 = nn.MaxPool1d(5)
+        self.mp2 = nn.MaxPool1d(n_pool)
         
         self.lstm = nn.LSTM(
             input_size=n_conv_outs,

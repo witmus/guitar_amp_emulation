@@ -1,5 +1,4 @@
 import torch
-from torchaudio.transforms import Spectrogram
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -28,9 +27,7 @@ def plot_waveform(waveform, sample_rate=SAMPLE_RATE, title='Waveform', channel_t
     plt.show()
 
 def plot_spectrum(waveform, sample_rate=SAMPLE_RATE, title='Spektrum'):
-    transform = Spectrogram(800)
-    spectrum = transform(waveform)
-    fft = torch.fft.fft(spectrum)
+    fft = torch.fft.fft(waveform)
     magnitude = torch.abs(fft)
     half_len = len(magnitude) // 2
     magnitude = magnitude[:half_len]

@@ -20,9 +20,10 @@ lstm_batch_size = 2000
 
 lstm_student_num_layers = 1
 lstm_student_num_hidden = 64
-lstm_student_filters = 24
-lstm_student_strides = 1
-lstm_student_kernel_size = 11
+lstm_student_filters = 12
+lstm_student_strides = 2
+lstm_student_kernel_size = 5
+lstm_student_pool = 3
 
 wavenet_steps = 4000
 wavenet_batch_size = 5
@@ -65,15 +66,15 @@ else:
 
 rkf = RepeatedKFold(n_splits=folds,n_repeats=repeats,random_state=seed)
 
-lstm_from_lstm_scores = np.zeros(shape=(folds*repeats,epochs,16))
-lstm_from_lstm_scores_path = f'scores/knowledge_distillation/lstm_from_lstm.npy'
-lstm_from_lstm_model_path = f'models/knowledge_distillation/students/lstm_from_lstm'
-np.save(lstm_from_lstm_scores_path, lstm_from_lstm_scores)
+# lstm_from_lstm_scores = np.zeros(shape=(folds*repeats,epochs,16))
+# lstm_from_lstm_scores_path = f'scores/knowledge_distillation/lstm_from_lstm.npy'
+# lstm_from_lstm_model_path = f'models/knowledge_distillation/students/lstm_from_lstm'
+# np.save(lstm_from_lstm_scores_path, lstm_from_lstm_scores)
 
-wavenet_from_wavenet_scores = np.zeros(shape=(folds*repeats,epochs,16))
+# wavenet_from_wavenet_scores = np.zeros(shape=(folds*repeats,epochs,16))
 wavenet_from_wavenet_scores_path = f'scores/knowledge_distillation/wavenet_from_wavenet.npy'
 wavenet_from_wavenet_model_path = f'models/knowledge_distillation/students/wavenet_from_wavenet'
-np.save(wavenet_from_wavenet_scores_path, wavenet_from_wavenet_scores)
+wavenet_from_wavenet_scores = np.load(wavenet_from_wavenet_scores_path)
 
 # lstm_from_wavenet_scores = np.zeros(shape=(folds*repeats,epochs,16))
 # lstm_from_wavenet_scores_path = f'scores/knowledge_distillation/lstm_from_wavenet.npy'
@@ -89,7 +90,7 @@ torch.manual_seed(22150)
 fold_checkpoint = 22
 for i,(train,val) in enumerate(rkf.split(range(folds))):
     if i < fold_checkpoint:
-	continue
+        continue
 
     print(f'fold: {i}')
     print()
@@ -103,64 +104,64 @@ for i,(train,val) in enumerate(rkf.split(range(folds))):
     tl = t_lstm[train].flatten()
     tw = t_wn[train].flatten()
 
-    print('wavenet from wavenet')
+    # print('wavenet from wavenet')
 
-    wavenet_train_dataloader = get_wavenet_teacher_dataloader(x_train, y_train, tw, wavenet_steps, wavenet_batch_size, is_cuda)
-    wavenet_val_dataloader = get_wavenet_paired_dataloader(x_val, y_val, wavenet_steps, wavenet_batch_size, is_cuda)
+    # wavenet_train_dataloader = get_wavenet_teacher_dataloader(x_train, y_train, tw, wavenet_steps, wavenet_batch_size, is_cuda)
+    # wavenet_val_dataloader = get_wavenet_paired_dataloader(x_val, y_val, wavenet_steps, wavenet_batch_size, is_cuda)
     
-    wavenet_student_model = WaveNet(
-        num_channels=wavenet_student_channels,
-        dilation_depth=wavenet_student_dilation_depth,
-        num_repeat=wavenet_student_repeats,
-        kernel_size=wavenet_student_kernel_size
-    )
+    # wavenet_student_model = WaveNet(
+    #     num_channels=wavenet_student_channels,
+    #     dilation_depth=wavenet_student_dilation_depth,
+    #     num_repeat=wavenet_student_repeats,
+    #     kernel_size=wavenet_student_kernel_size
+    # )
 
-    wavenet_student_optimizer = torch.optim.Adam(wavenet_student_model.parameters(), lr=learning_rate)
-    wavenet_student_model = distill_wavenet(
-        student=wavenet_student_model,
-        optimizer=wavenet_student_optimizer,
-        train_loader=wavenet_train_dataloader,
-        val_loader=wavenet_val_dataloader,
-        epochs=epochs,
-        device=device,
-        scores_path=wavenet_from_wavenet_scores_path,
-        model_path=wavenet_from_wavenet_model_path,
-        fold=i
-    )
-    print()
+    # wavenet_student_optimizer = torch.optim.Adam(wavenet_student_model.parameters(), lr=learning_rate)
+    # wavenet_student_model = distill_wavenet(
+    #     student=wavenet_student_model,
+    #     optimizer=wavenet_student_optimizer,
+    #     train_loader=wavenet_train_dataloader,
+    #     val_loader=wavenet_val_dataloader,
+    #     epochs=epochs,
+    #     device=device,
+    #     scores_path=wavenet_from_wavenet_scores_path,
+    #     model_path=wavenet_from_wavenet_model_path,
+    #     fold=i
+    # )
+    # print()
     
-    print('lstm from lstm')
+    # print('lstm from lstm')
 
-    lstm_train_dataloader = get_sw_teacher_dataloader(x_train, y_train, tl, lstm_num_steps, lstm_batch_size, is_cuda)
+    # lstm_train_dataloader = get_sw_teacher_dataloader(x_train, y_train, tl, lstm_num_steps, lstm_batch_size, is_cuda)
     lstm_val_dataloader = get_sw_paired_dataloader(x_val, y_val, lstm_num_steps, lstm_batch_size, is_cuda)
     
-    lstm_student_model = WindowLSTM(
-        n_conv_outs=lstm_student_filters,
-        s_kernel=lstm_student_kernel_size,
-        n_stride=lstm_student_strides,
-        n_hidden=lstm_student_num_hidden,
-        n_layers=lstm_student_num_layers
-    )
+    # lstm_student_model = WindowLSTM(
+    #     n_conv_outs=lstm_student_filters,
+    #     s_kernel=lstm_student_kernel_size,
+    #     n_stride=lstm_student_strides,
+    #     n_hidden=lstm_student_num_hidden,
+    #     n_layers=lstm_student_num_layers
+    # )
 
-    lstm_student_optimizer = torch.optim.Adam(lstm_student_model.parameters(), lr=learning_rate)
-    lstm_student_model = distill_lstm(
-        student=lstm_student_model,
-        optimizer=lstm_student_optimizer,
-        train_loader=lstm_train_dataloader,
-        val_loader=lstm_val_dataloader,
-        epochs=epochs,
-        device=device,
-        scores_path=lstm_from_lstm_scores_path,
-        model_path=lstm_from_lstm_model_path,
-        fold=i
-    )
+    # lstm_student_optimizer = torch.optim.Adam(lstm_student_model.parameters(), lr=learning_rate)
+    # lstm_student_model = distill_lstm(
+    #     student=lstm_student_model,
+    #     optimizer=lstm_student_optimizer,
+    #     train_loader=lstm_train_dataloader,
+    #     val_loader=lstm_val_dataloader,
+    #     epochs=epochs,
+    #     device=device,
+    #     scores_path=lstm_from_lstm_scores_path,
+    #     model_path=lstm_from_lstm_model_path,
+    #     fold=i
+    # )
     
-    print()
+    # print()
 
     # print()
     # print('lstm from wavenet')
 
-    # lstm_from_wavenet_train_dataloader = get_sw_teacher_dataloader(x_train, y_train, tw, lstm_num_steps, lstm_batch_size, is_cuda)
+    lstm_from_wavenet_train_dataloader = get_sw_teacher_dataloader(x_train, y_train, tw, lstm_num_steps, lstm_batch_size, is_cuda)
     
     # lstm_student_model = WindowLSTM(
     #     n_conv_outs=lstm_student_filters,
@@ -209,3 +210,31 @@ for i,(train,val) in enumerate(rkf.split(range(folds))):
     # )
 
     # print()
+    
+    print('lstm small Conv from wavenet')
+
+    lstm_from_wavenet_train_dataloader = get_sw_teacher_dataloader(x_train, y_train, tw, lstm_num_steps, lstm_batch_size, is_cuda)
+    
+    lstm_student_model = WindowLSTM(
+        n_conv_outs=lstm_student_filters,
+        s_kernel=lstm_student_kernel_size,
+        n_stride=lstm_student_strides,
+        n_hidden=lstm_student_num_hidden,
+        n_layers=lstm_student_num_layers,
+        n_pool=lstm_student_pool
+    )
+
+    lstm_student_optimizer = torch.optim.Adam(lstm_student_model.parameters(), lr=learning_rate)
+    lstm_student_model = distill_lstm(
+        student=lstm_student_model,
+        optimizer=lstm_student_optimizer,
+        train_loader=lstm_from_wavenet_train_dataloader,
+        val_loader=lstm_val_dataloader,
+        epochs=epochs,
+        device=device,
+        scores_path='scores/knowledge_distillation/lstm_small_conv.npy',
+        model_path='models/knowledge_distillation/students/lstm_small_conv',
+        fold=i
+    )
+    
+    print()
