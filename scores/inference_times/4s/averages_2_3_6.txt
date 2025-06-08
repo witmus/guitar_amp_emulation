@@ -1,0 +1,48 @@
+-------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  
+                                                   Name    Self CPU %      Self CPU   CPU total %     CPU total  CPU time avg    # of Calls  
+-------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  
+                                        model_inference         1.71%     802.909ms       100.00%       46.946s       46.946s             1  
+                                            aten::empty         0.04%      20.937ms         0.04%      20.937ms      19.808us          1057  
+                                          aten::random_         0.00%      12.700us         0.00%      12.700us      12.700us             1  
+                                             aten::item         0.00%       4.600us         0.00%       6.800us       6.800us             1  
+                              aten::_local_scalar_dense         0.00%       2.200us         0.00%       2.200us       2.200us             1  
+enumerate(DataLoader)#_SingleProcessDataLoaderIter._...         6.85%        3.214s        11.66%        5.474s      61.506ms            89  
+                                            aten::slice         3.18%        1.494s         3.49%        1.639s       9.302us        176241  
+                                       aten::as_strided         0.32%     148.446ms         0.32%     148.446ms       0.836us        177561  
+                                             aten::view         0.79%     372.897ms         0.79%     372.897ms       2.118us        176065  
+                                            aten::stack         0.32%     150.535ms         0.60%     282.252ms       1.069ms           264  
+                                              aten::cat         0.27%     125.229ms         0.28%     131.051ms     496.406us           264  
+                                           aten::narrow         0.01%       2.961ms         0.01%       5.823ms      22.056us           264  
+                                          aten::permute         0.01%       4.526ms         0.01%       5.227ms      29.699us           176  
+                                           aten::conv1d         0.00%       1.615ms        41.03%       19.260s     109.434ms           176  
+                                aten::_convolution_mode         0.01%       3.046ms        41.02%       19.259s     109.425ms           176  
+                                      aten::convolution         0.01%       3.279ms        41.02%       19.256s     109.407ms           176  
+                                     aten::_convolution         0.02%      10.088ms        41.01%       19.252s     109.389ms           176  
+                                        aten::unsqueeze         0.00%       1.880ms         0.01%       2.678ms       7.608us           352  
+                               aten::mkldnn_convolution        40.95%       19.226s        40.98%       19.237s     109.300ms           176  
+                                          aten::resize_         0.01%       3.565ms         0.01%       3.565ms      20.253us           176  
+                                          aten::squeeze         0.00%       2.035ms         0.01%       2.808ms      15.953us           176  
+                                             aten::relu         0.01%       3.596ms         7.60%        3.566s      20.261ms           176  
+                                        aten::clamp_min         7.59%        3.562s         7.59%        3.562s      20.241ms           176  
+                                       aten::max_pool1d        24.97%       11.720s        30.17%       14.162s      80.468ms           176  
+                                       aten::contiguous         0.01%       2.444ms         5.64%        2.647s      15.040ms           176  
+                                            aten::clone         0.01%       3.315ms         5.63%        2.645s      15.026ms           176  
+                                       aten::empty_like         0.00%     971.300us         0.02%       7.362ms      41.832us           176  
+                                            aten::copy_         5.61%        2.635s         5.61%        2.635s       9.979ms           264  
+                                      aten::as_strided_         0.00%     569.600us         0.00%     569.600us       6.473us            88  
+                                            aten::zeros         0.00%       1.494ms         0.05%      21.648ms     122.999us           176  
+                                            aten::zero_         0.01%       4.652ms         0.04%      19.348ms     109.934us           176  
+                                            aten::fill_         0.03%      14.696ms         0.03%      14.696ms      83.501us           176  
+                                             aten::lstm         0.02%       9.531ms         7.75%        3.638s      41.336ms            88  
+                              aten::cudnn_is_acceptable         0.00%      50.400us         0.00%      50.400us       0.573us            88  
+                                        aten::transpose         0.01%       5.692ms         0.01%       6.109ms      23.141us           264  
+                                           aten::select         0.01%       4.433ms         0.01%       4.944ms      18.727us           264  
+                                 aten::mkldnn_rnn_layer         7.20%        3.378s         7.20%        3.380s      38.411ms            88  
+                                              aten::add         0.00%       1.118ms         0.00%       1.118ms      12.700us            88  
+                                           aten::linear         0.01%       2.690ms         0.02%      11.642ms     132.297us            88  
+                                                aten::t         0.00%     533.700us         0.00%     995.900us      11.317us            88  
+                                            aten::addmm         0.01%       6.728ms         0.02%       7.956ms      90.410us            88  
+                                           aten::expand         0.00%     388.400us         0.00%     468.700us       5.326us            88  
+                                     aten::resolve_conj         0.00%      51.700us         0.00%      51.700us       0.294us           176  
+-------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  
+Self CPU time total: 46.946s

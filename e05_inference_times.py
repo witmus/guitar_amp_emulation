@@ -16,21 +16,19 @@ def test_inference(model, dataloader, scores, scores_path, i_m, i_s):
         _ = model(x)
 
     repeats = 10
-    with profile(activities=[ProfilerActivity.CPU],record_shapes=True) as prof:
-        with record_function('model_inference'):
-            for r in range(repeats):
+    for r in range(repeats):
+        with profile(activities=[ProfilerActivity.CPU],record_shapes=True) as prof:
+            with record_function('model_inference'):
                 print('repeat: ', r)
                 with torch.no_grad():
                     for i,x in enumerate(dataloader):
                         print(f'{i+1}/{len(dataloader)}',end='\r')
                         _ = model(x)
-    print()
+        with open(f'{scores_path}/averages_{i_m}_{i_s}_{r}.txt', mode='w') as f:
+            f.write(str(prof.key_averages()))
+        scores[i_m,i_s,r] = prof.profiler.self_cpu_time_total
+        np.save(scores_path + '/inference_times.npy', scores)
 
-    with open(f'scores/averages_{i_m}_{i_s}.txt', mode='w') as f:
-        f.write(str(prof.key_averages()))
-
-    scores[i_m,i_s] = prof.profiler.self_cpu_time_total
-    np.save(scores_path, scores)
 
 lstm_num_steps = 600
 lstm_batch_size = 2000
@@ -85,14 +83,15 @@ lstm_biggest.load_state_dict(torch.load(lstm_biggest_path, weights_only=True, ma
 lstm_biggest.eval()
 
 models = [wavenet_small, wavenet_big, lstm_small, lstm_big, lstm_biggest]
+sample_time_seconds = 8
 
-scores_path = 'scores/inference_times.npy'
-scores = np.load(scores_path)
+scores_path = f'scores/inference_times/{sample_time_seconds}s'
+scores = np.load(scores_path + '/inference_times.npy')
 
 for m,model in enumerate(models):
     for s,sample_path in enumerate(sample_paths):
         print(m, ' ', sample_path)
-        x = get_dry_tensor(sample_path)[:(44100 * 10)]
+        x = get_dry_tensor(sample_path)[:(44100 * sample_time_seconds)]
         dataloader = \
             get_sw_dataloader(x, lstm_num_steps, lstm_batch_size, False) if m > 1 \
             else get_wavenet_dataloader(x, wavenet_steps, wavenet_batch_size, False)

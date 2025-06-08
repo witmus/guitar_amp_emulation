@@ -1,4 +1,5 @@
 import torch
+from torchaudio.transforms import Spectrogram
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -24,6 +25,26 @@ def plot_waveform(waveform, sample_rate=SAMPLE_RATE, title='Waveform', channel_t
         else:
             axes[c].set_ylabel('Poziom sygnału')
     figure.suptitle(title)
+    plt.show()
+
+def plot_spectrum(waveform, sample_rate=SAMPLE_RATE, title='Spektrum'):
+    transform = Spectrogram(800)
+    spectrum = transform(waveform)
+    fft = torch.fft.fft(spectrum)
+    magnitude = torch.abs(fft)
+    half_len = len(magnitude) // 2
+    magnitude = magnitude[:half_len]
+    freqs = torch.linspace(0, sample_rate / 2, half_len)
+    
+    plt.figure(figsize=(10, 4))
+    plt.plot(freqs.numpy(), magnitude.numpy())
+    plt.title(title)
+    plt.xlabel('Częstotliwość (Hz)')
+    plt.ylabel('Magnitude')
+    plt.xscale('log')
+    plt.yscale('log')
+    plt.grid(True)
+    plt.tight_layout()
     plt.show()
 
 def get_stats(losses: List[float]):
