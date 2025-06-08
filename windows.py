@@ -68,8 +68,8 @@ class WavenetPairedWindowArray(Sequence):
             x = torch.concat((padding, x))
             y = torch.concat((padding, y))
 
-        self.x = x
-        self.y = y[window_len:]
+        self.x = torch.concat((torch.zeros(window_len), x))
+        self.y = y
     
     def __len__(self):
         return int(len(self.x) / self.window_len) - 1
@@ -89,9 +89,9 @@ class WavenetPairedWindowTeacherArray(Sequence):
             y = torch.concat((padding, y))
             t = torch.concat((padding, t))
 
-        self.x = x
-        self.y = y[window_len:]
-        self.t = t[window_len:]
+        self.x = torch.concat((torch.zeros(window_len), x))
+        self.y = y
+        self.t = t
     
     def __len__(self):
         return int(len(self.x) / self.window_len) - 1
