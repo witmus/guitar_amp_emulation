@@ -4,12 +4,13 @@ import torch.nn as nn
 class WindowLSTM(nn.Module):
     def __init__(self, n_conv_outs, s_kernel, n_stride, n_hidden, n_layers, n_pool=5):
         super(WindowLSTM, self).__init__()
+        padding = 'same' if n_stride == 1 else 'valid'
         self.conv1 = nn.Conv1d(
             in_channels=1,
             out_channels=n_conv_outs,
             kernel_size=s_kernel,
             stride=n_stride,
-            padding='same'
+            padding=padding
         )
 
         self.relu1 = nn.ReLU()
@@ -20,7 +21,7 @@ class WindowLSTM(nn.Module):
             out_channels=n_conv_outs,
             kernel_size=s_kernel,
             stride=n_stride,
-            padding='same'
+            padding=padding
         )
 
         self.relu2 = nn.ReLU()
